@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Caches and authentication
+cache/
+auth/
+
+# Build output
+dist/
+*.log
+
+.wwebjs_auth/
+.wwebjs_cache/
