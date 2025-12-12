@@ -1,8 +1,12 @@
-# 🎮 WebOred.js - AI-Powered WhatsApp Game Bot
+# 🎮 WeBored - AI-Powered WhatsApp Game Bot
 
-> A fun, extensible WhatsApp bot that plays games with you using AI intelligence! Built with TypeScript, Groq AI, and WhatsApp Web.js
+> A fun, extensible WhatsApp bot that plays games and call tools(acting as an agent) with you using AI intelligence! Built with TypeScript, Groq AI, and WhatsApp Web.js
 
 ---
+
+APIS used : google sheet api for text storage(database), groq for AI intelligence, cloudinary for image storage
+
+**I built it to have fun with me and my friends. solves the "we have nothung to talk about " problem, "truth or dare, but none one has a questions or an interesting dare to ask", "ask questions and ill answer but no one wants to ask the questions", "nothing interesting to talk about" etc**
 
 ## 🌟 Features
 
@@ -176,6 +180,8 @@ your_game_name: {
 
 - **`send_whatsapp_message`** - Send text responses
 - **`picture_questions`** - Send random images from Cloudinary for guessing games
+- **`truth_or_dare`** - sends truth or dare
+- **`pick a number`** - pick a number and you get a qustion/task to do. always suprising
 
 ---
 
@@ -226,13 +232,16 @@ await sendMedia("233536287642@c.us", imageUrl, {
 
 ### Coming Soon
 
-- [ ] **Conversation History** - Remember user context across messages
-- [ ] **Truth or Dare Game** - Full multiplayer game implementation
-- [ ] **Leaderboard System** - Track user scores
+- [x] **Conversation History** - Remember user context across messages
+- [ ] use redis for conversation history and find a better way to store it, rather than object of array. and use an engine that resets the conversation etc
+- [x] **Truth or Dare Game** - Full multiplayer game implementation
+- [ ] **Random** - add a function that makes sure the AI doesnt repeat the same question or dare to the user, not the AI but random function doesn't unless maybe the user requests for it.... so have about 1000+ questions and dares to avoid repetition, or store asked questions in db and avoid repeating.
 - [ ] **Custom AI Models** - Support for Claude, GPT-4, Gemini Pro
 - [ ] **Local LLM Support** - Run models locally with llama.cpp
-- [ ] **Database Integration** - Persistent user data and game stats
+- [x] **Database Integration** - Persistent user data and game stats
 - [ ] **Multi-User Support** - Handle multiple user conversations
+- [ ] **Fix status@broadcast issue**
+- [ ] **unify tool handler and response handler into one mega handler**
 
 ### Conversation History Example
 

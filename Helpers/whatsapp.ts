@@ -37,3 +37,53 @@ export const clearState = async (msg: WAWebJS.Message) => {
   const chat = await msg.getChat();
   chat.clearState();
 };
+
+export const checkIsGroup = async (msg: WAWebJS.Message) => {
+  const chat = await msg.getChat();
+  if (chat.isGroup) {
+    return "Yes This message is from a group";
+  } else {
+    return "No, This message is not from a group";
+  }
+};
+
+export const getParticipantNames = async (msg: WAWebJS.Message) => {
+  try {
+    const chat = await msg.getChat();
+    if (!chat.isGroup) {
+      throw new Error("Not a group");
+    }
+
+    const groupChat = chat as WAWebJS.GroupChat;
+    const participants = groupChat.participants;
+
+    const participantNames = await Promise.all(
+      participants.map(async (participant) => {
+        try {
+          const contact = await client.getContactById(
+            participant.id._serialized
+          );
+          return {
+            name:
+              contact.pushname ||
+              contact.name ||
+              contact.number ||
+              participant.id.user,
+            number: participant.id.user,
+          };
+        } catch {
+          return {
+            name: participant.id.user,
+            number: participant.id.user,
+          };
+        }
+      })
+    );
+
+    console.log(participantNames);
+    return participantNames;
+  } catch (error) {
+    console.error("Error getting group participants:", error);
+    throw error;
+  }
+};

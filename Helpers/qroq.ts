@@ -1,34 +1,75 @@
 import WAWebJS from "whatsapp-web.js";
-import { groq } from "../core/qroqClient.js";
+import { groq, client2, client3 } from "../core/qroqClient.js";
 import { toolRegistry } from "../utils/tool_registry.js";
+import type { ChatCompletionTool } from "openai/resources/index.mjs";
 
-const tools = Object.entries(toolRegistry).map(([toolName, toolData]) => ({
+const conversationHistory: { [key: string]: any[] } = {};
+
+const tools = Object.entries(toolRegistry).map(([name, data]) => ({
   type: "function",
   function: {
-    name: toolName,
-    description: toolData.description,
-    parameters: toolData.parameters,
+    name,
+    description: data.description,
+    parameters: data.parameters,
   },
 }));
 
-export const completion = async (msg: WAWebJS.Message) => {
+export const completion = async (
+  msg: WAWebJS.Message,
+  toolContext?: { toolName: string; toolResult: any }
+) => {
+  const userId = msg.from;
+
+  if (!conversationHistory[userId]) {
+    conversationHistory[userId] = [];
+  }
+
+  if (toolContext) {
+    // Tool result - ask LLM to format a response
+    conversationHistory[userId].push({
+      role: "user",
+      content: `Tool "${toolContext.toolName}" returned: ${JSON.stringify(
+        toolContext.toolResult
+      )}. Format a friendly, engaging response for the user. For tools like truth or dare your respone should be about who is next or if you want to continue playing because the tool already sends the task to the user.`,
+    });
+  } else {
+    // Normal user message - ensure content is not empty
+    if (msg.body && msg.body.trim() !== "") {
+      conversationHistory[userId].push({
+        role: "user",
+        content: msg.body,
+      });
+    }
+  }
+
+  // Filter out any messages with undefined/empty content
+  const validMessages = conversationHistory[userId].filter(
+    (m) => m.content !== undefined && m.content !== null && m.content !== ""
+  );
+
   const response = await groq.chat.completions.create({
     messages: [
       {
         role: "system",
         content:
-          "When a user asks a request, check your tools to identify whcih best could be used to complete that request and fufill the request. If you don't have tool respond with the send_whatsapp_message tool to reply to them",
+          "You are a fun WhatsApp game bot. When tool results are provided, format them in an engaging way for the user.",
       },
-      {
-        role: "user",
-        content: msg.body,
-      },
+      ...validMessages,
     ],
     model: "openai/gpt-oss-20b",
-    tools: tools,
-    tool_choice: "auto",
+    tools: toolContext ? undefined : tools,
+    tool_choice: toolContext ? undefined : "auto",
   });
-  console.log("Completion response:");
-  console.log(response.choices[0].message.tool_calls || "");
+
+  const assistantMessage = response.choices[0]?.message;
+
+  // Only push if content exists
+  if (assistantMessage?.content) {
+    conversationHistory[userId].push({
+      role: "assistant",
+      content: assistantMessage.content,
+    });
+  }
+
   return response;
 };
