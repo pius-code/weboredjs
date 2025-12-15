@@ -1,7 +1,7 @@
 import { client } from "../core/client.js";
 import WAWebJS from "whatsapp-web.js";
 
-const { MessageMedia } = WAWebJS;
+const { MessageMedia, Poll } = WAWebJS;
 
 export const sendMessage = (
   to: string,
@@ -86,4 +86,13 @@ export const getParticipantNames = async (msg: WAWebJS.Message) => {
     console.error("Error getting group participants:", error);
     throw error;
   }
+};
+
+export const sendPoll = async (
+  to: string,
+  question: string,
+  answers: string[]
+) => {
+  const poll = new Poll(question, answers);
+  await client.sendMessage(to, poll);
 };
