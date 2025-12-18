@@ -397,6 +397,7 @@ Have an awesome game idea or feature?
 2. Create a new branch
 3. Add your changes
 4. Submit a pull request
+   DOCS: https://github.com/pedroslopez/whatsapp-web.js/blob/main/example.js#L359
 
 ---
 
